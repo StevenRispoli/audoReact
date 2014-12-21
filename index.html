@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset = utf-8"/>
+		<meta name="viewport" content="width=device-width, inital-scale = 1">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+		<link rel="stylesheet" type="text/css" href="css/styles.css">
+		<title>audiMate</title>
+	</head>
+	<body>
+		<header class="navbar navbar-inverse navbar-static-top" role="navigation">
+			<div class="container-fluid">
+		        <button type="button" class="navbar-toggle pull-left" data-toggle="collapse" data-target=".navbar-collapse">
+		          <span class="icon-bar"></span>
+		          <span class="icon-bar"></span>
+		          <span class="icon-bar"></span>
+		        </button>
+		        <nav class="collapse navbar-collapse">
+		            <ul class="nav navbar-nav navbar-left">
+		            	<li>
+		            		<select name="key">
+		            			<option value="A">A</option>
+		            			<option value="A#">A#</option>
+		            			<option value="B">B</option>
+		            			<option value="C">C</option>
+		            			<option value="C#">C#</option>
+		            			<option value="D">D</option>
+		            			<option value="D#">D#</option>
+		            			<option value="E">E</option>
+		            			<option value="F">F</option>
+		            			<option value="F#">F#</option>
+		            			<option value="G">G</option>
+		            			<option value="G#">G#</option>
+		            		</select>
+		            	</li>
+		                <li>
+		                	<select name="mode">
+		                		<option value="1">Ionian</option>
+		                		<option value="2">Dorian</option>
+		                		<option value="3">Phyrigian</option>
+		                		<option value="4">Lydian</option>
+		                		<option value="5">Mixolydian</option>
+		                		<option value="6">Aeolian</option>
+		                		<option value="7">Locrian</option>
+		                	</select>
+		            	</li>
+		            	<li>
+		            		<button id="start">Start</button>
+		            	</li>
+		            </ul>
+		        </nav>
+		    </div>
+		</header> 
+		<h3>Level: <span id="level"></span></h3>
+		<h3>BPM: <span id="bpm"></span></h3>
+		<h3>Score: <span id="score"></span></h3>
+		<h1 class="notes">Press start to begin</h1>
+		<canvas id="visualizer" height="300"></canvas>
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/bootstrap.min.js"></script>
+		<script src='js/main.js'></script>
+	</body>
+</html> 
