@@ -1,6 +1,11 @@
 $(document).ready(function () {
 
-	//Function for generating random rhythm
+	//---------------------------------------Random rhythm generation--------------------------------------------
+	
+	/**
+	 *Based on euclid's algorithm for finding the greatest common factor of two numbers 
+	 *Inspired by: http://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf
+	 */
 	var euclid = function(m,k){
 		var beats = [];
 		var rhythm = [];
@@ -34,8 +39,9 @@ $(document).ready(function () {
 					lastArrIndex = i-1;
 					break;
 				}else if(i === beats.length-1){
-					/*	Why would returning rhythm here and then calling mergeDiffArrays() in the return
-					 *	statement for euclid() return a value of undefined?
+					/**	
+					 * Why would returning rhythm here and then calling mergeDiffArrays() in the return
+					 * statement for euclid() return a value of undefined?
 					 */
 					rhythm = beats.join().split(",");
 					rhythm.forEach(function(_, index){
@@ -59,21 +65,23 @@ $(document).ready(function () {
 		return rhythm;
 	};
 
-	//------------------------------------------------------------------------------------------------------------
+	//-----------------------------------------------Game Logic--------------------------------------------------
 	
-	//LEVELS
+	//Properties of a level
 	var level = 1;
 	var score = 0;
-	var numZeros = 0;
-	var m = 0;
-	var k = 0;
-	var min = 0;
-	var max = 0;
-	var ms = 0;
+	var numZeros = 0;//Number of unaccented beats
+	var m = 0;//Total number of beats
+	var k = 0;//Number of accented beats
+	var min = 0;//Min length of rhythm
+	var max = 0;//Max length of rhythm
+	var ms = 0;//Time in ms that a sound plays. Will always be equal to half the length of a beat
 	var bpm = 60;
+
+	//Rhythm playback is 5 bpm faster every fourth level
 	var setBPM = function(){
-		if(!((level-1)%8) && level-1 > 0){
-			bpm += 20;
+		if(!((level-1)%4) && level-1 > 0){
+			bpm += 5;
 		}
 	};
 
@@ -83,14 +91,14 @@ $(document).ready(function () {
 		$('#level').html(level);
 		setBPM();
 		$('#bpm').html(bpm);
-		max = Math.ceil(level/8)*8;//max length of rhythm is equal to the next level that is a multiple of 8
-		min = max/4;
+		max = Math.ceil(level/4)*4;//max length of rhythm is equal to the next level that is a multiple of 4
+		min = max/2;
 		m = Math.floor(Math.random()*((max+1)-min))+min;//random integer between min and max, including min but excluding max
-		ms = (60000/bpm)/2;//Play back time is 20 bpm quicker every 8 levels
+		ms = (60000/bpm)/2;
 		if(Math.random()<.5){
 			k = Math.ceil((Math.floor(Math.random()*(m-min))+min)*.5);//k will be less than half of m
 		}else{
-			k = Math.floor((Math.floor(Math.random()*(m-min))+min)*.75);//k will be no more than 3/4 of m. Ensures that there won't be too few rests.
+			k = Math.floor((Math.floor(Math.random()*(m-min))+min)*.75);//k will be no more than 3/4 of m. Ensures that there won't be too few unaccented beats.
 		}
 
 		var beatArray = euclid(m, k);//Generate random rhythm using m and k
@@ -119,10 +127,10 @@ $(document).ready(function () {
 				if(beat === 1){//Accented beats are played one octave higher than unaccented beats
 					keydown.which = 59;
 					keyup.which = 59;
-					$('body').trigger(keydown);
+					$('body').trigger(keydown, true);
 					accented = true;
 				}else {
-					$('body').trigger(keydown);
+					$('body').trigger(keydown, true);
 					accented = false;
 				}
 			};
@@ -174,7 +182,6 @@ $(document).ready(function () {
 				}
 				setTimeout(function(){
 					isAccented();
-					console.log('should keyup');
 				}, ms);
 				if(beatArray[i+1] !== undefined){
 					setTimeout(function(){
@@ -208,51 +215,34 @@ $(document).ready(function () {
 				setTimeout(function(){
 					isAccented();
 					$('.notes').html(String.fromCharCode(beatArray[i+1])).addClass('faded');
-					console.log('note is: ', beatArray[i+1]);
-					if(foundKeys.length === 2 && hit === true){
+					if(foundKeys.length === 1 && hit === true){
 						score++;
 						$('#score').html(score);
 					}
 					if(beatArray[i+1] !== undefined){
 						setTimeout(function(){
 							playRhythm(beatArray, i+1);
-							console.log('should log as soon as new sound starts');
 						}, ms);
 					} else {
 						endRound();
 					}
 				}, ms);
-			} else {
-				console.log('ELSE HIT');
-				// waveformColor = 'rgb(0,153,255)';
-				// usersTurn = 3;
-				// accented = false;
-				// if(score === numZeros){
-				// 	isAccented();
-				// 	$('.notes').html('Finished').removeClass('faded');
-				// 	numZeros = 0;
-				// 	score = 0;
-				// 	level++;
-				// } else {
-				// 	isAccented();
-				// 	$('.notes').html('Try Again').removeClass('faded');
-				// 	numZeros = 0;
-				// 	score = 0;
-				// }
 			}
 		};
 		playRhythm(beatArray);
 	});
 
-	//CANVAS
+	//--------------------------------------------------CANVAS--------------------------------------------------
+	
 	var canvas = document.getElementById('visualizer');
 	var canvasContext = canvas.getContext('2d');
 	var width = $(window).width();
 	canvas.setAttribute('width', width);
 	var waveformColor = 'rgb(0,153,255)';
 	var drawVisual;
-
 	var analyser;
+
+	//Source for visualize function: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Visualizations_with_Web_Audio_API
 	var visualize = function(analyser){
 		var width = canvas.width;
 		var height = canvas.height;
@@ -284,36 +274,34 @@ $(document).ready(function () {
 			canvasContext.beginPath();
 
 			var sliceWidth = width * 1.0 / bufferLength;
-				var x = 0;
+			var x = 0;
 
-				for(var i = 0; i < bufferLength; i++) {
+			for(var i = 0; i < bufferLength; i++) {
 
-					var v = dataArray[i] / 128.0;
-					var y = v * height/2;
+				var v = dataArray[i] / 128.0;
+				var y = v * height/2;
 
-					if(i === 0) {
-					  canvasContext.moveTo(x, y);
-					} else {
-					  canvasContext.lineTo(x, y);
-					}
-
-					x += sliceWidth;
+				if(i === 0) {
+				  canvasContext.moveTo(x, y);
+				} else {
+				  canvasContext.lineTo(x, y);
 				}
 
-				canvasContext.lineTo(canvas.width, canvas.height/2);
-				canvasContext.stroke();
+				x += sliceWidth;
+			}
+
+			canvasContext.lineTo(canvas.width, canvas.height/2);
+			canvasContext.stroke();
 	    };
 		
 		draw();
-		
 	}
 
-	//Context needed to create nodes and handle audio processing
-	var context = new AudioContext();
-	//provides time and frequency analysis
-	analyser = context.createAnalyser();
+	//-----------------------------------------Oscillator creation----------------------------------------------
+
+	var context = new AudioContext();//Context needed to create nodes and handle audio processing
+	analyser = context.createAnalyser();//provides time and frequency analysis
 	function Oscillator(frequency){
-		//analyser for visualization
 		this.osc = context.createOscillator();
 		this.osc.type = 'sine';
 		this.osc.frequency.value = frequency;
@@ -350,20 +338,15 @@ $(document).ready(function () {
 	var mode = +($('select[name="mode"]').val());
 
 	var scalePicker = function(tonic, modeNum){
-		//reset scale
-		scale = [];
+		scale = [];//reset scale
 	    var root = chromaticC4[tonic];
-	    /**
-	     * One semitone up is the original notes frequency multiplied by the 12th root of 2
-	     * Reference: http://en.wikipedia.org/wiki/Piano_key_frequencies
-	     */       
+	    //One semitone up is the original notes frequency multiplied by the 12th root of 2
 	    var wholeStep = function(note){
 	      return Math.pow(Math.pow(2, 1/12), 2)*note;
 	    }
 	    var halfStep = function(note){
 	      return Math.pow(2, 1/12)*note; 
 	    }
-
 
 	    //The half step notes of each mode
 	    var ionian = [3,7];
@@ -415,10 +398,9 @@ $(document).ready(function () {
 
 	var makeOscillators = function(){
 		for(var i = 0; i < keyCodes.length; i++){
-			//assign frequencies to keycodes
-			scaleObj[keyCodes[i]] = scale[i];
-			//make new oscillators
+			scaleObj[keyCodes[i]] = scale[i];//assign frequencies to keycodes
 			var osc = new Oscillator(scaleObj[keyCodes[i]]);
+			
 			//assign osciallators to corresponding keycode in oscillators object
 			oscillators[keyCodes[i]] = osc;
 	    	osc.osc.start(0);
@@ -442,6 +424,9 @@ $(document).ready(function () {
 		$(this).blur();
 	});
 
+	//----------------------------------------------User action handling---------------------------------------
+
+	//False if user is not currently pressing a key
 	var depressedKeys = {
 		65: false,
 		83: false,
@@ -453,18 +438,15 @@ $(document).ready(function () {
 		59: false
 	};
 
-
-	$('body').on('keydown', function(e) {
-		if(e.which===186)//Keydown of semicolon button is 186, but semicolon char is 59
+	$('body').on('keydown', function(e, triggered) {
+		triggered = triggered || false;//Prevents triggered keydown events from altering depressedKeys object
+		if(e.which===186)//Keydown event number of semicolon button is 186, but semicolon character code is 59
 			key = 59
 		else
 	    	key = e.which;
-	    console.log(key);
-	    if(keyCodes.indexOf(key) > -1){
-		    if(depressedKeys[key] === false){
-		    	oscillators[key].gain.gain.value = .20;
-		    	depressedKeys[key] = true;
-	    	}
+	    if(keyCodes.indexOf(key) > -1 && depressedKeys[key] === false){
+	    	oscillators[key].gain.gain.value = .20;
+	    	if(triggered === false) depressedKeys[key] = true;
 	    }
   	});
 
@@ -472,7 +454,7 @@ $(document).ready(function () {
   		if(e.which===186)
   			key = 59
   		else
-  			key = e.which;
+  			key = e.which
   		if(keyCodes.indexOf(key) > -1){
   			oscillators[key].gain.gain.value=0;
   			depressedKeys[key] = false;
