@@ -118,7 +118,6 @@ $(document).ready(function () {
 		 */
 		var playRhythm = function(beatArray, i){
 			var i = i || 0;
-			var accented = false;
 			if(i > beatArray.length-3){
 				waveformColor = 'rgb(255,0,0)';
 			}else if(i > beatArray.length-5){
@@ -129,27 +128,22 @@ $(document).ready(function () {
 					keydown.which = 59;
 					keyup.which = 59;
 					$('body').trigger(keydown, true);
-					accented = true;
 				}else {
+					keydown.which = 65;
+					keyup.which = 65;
 					$('body').trigger(keydown, true);
-					accented = false;
 				}
 			};
 			sound(beatArray[i]);
 
-			var isAccented = function(){
+			var noSound = function(){
 				$('body').trigger(keyup);
-				if(accented){//reset keycode after accented note
-					keydown.which = 65;
-					keyup.which = 65;
-				}
 			}
 
 			var endRound = function(){
 				waveformColor = 'rgb(0,153,255)';
 				usersTurn = 3;
-				accented = false;
-				isAccented();
+				noSound();
 				if(score === numZeros){
 					$('.notes').html('Well Done').removeClass('faded');
 					failedBeat = false;
@@ -165,7 +159,7 @@ $(document).ready(function () {
 			if(usersTurn > 0){
 				$('.notes').html('Listen');
 				setTimeout(function(){
-					isAccented();
+					noSound();
 					if(beatArray[i+1] !== undefined){
 						setTimeout(function(){
 							playRhythm(beatArray, i+1)
@@ -185,7 +179,7 @@ $(document).ready(function () {
 				else
 					$('.notes').html('...');
 				setTimeout(function(){
-					isAccented();
+					noSound();
 				}, ms);
 				setTimeout(function(){
 					if(beatArray[i+1] !== undefined)
@@ -216,7 +210,7 @@ $(document).ready(function () {
 					}
 				}, 1);
 				setTimeout(function(){
-					isAccented();
+					noSound();
 					$('.notes').html(String.fromCharCode(beatArray[i+1])).addClass('faded');
 					if(foundKeys.length === 1 && hit === true){
 						score++;
