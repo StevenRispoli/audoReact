@@ -77,10 +77,11 @@ $(document).ready(function () {
 	var max = 0;//Max length of rhythm
 	var ms = 0;//Time in ms that a sound plays. Will always be equal to half the length of a beat
 	var bpm = 60;
+	var failedBeat = false;//Beat from level the user failed
 
 	//Rhythm playback is 5 bpm faster every fourth level
 	var setBPM = function(){
-		if(!((level-1)%4) && level-1 > 0){
+		if(!((level-1)%4) && level-1 > 0 && failedBeat === false){
 			bpm += 5;
 		}
 	};
@@ -101,7 +102,7 @@ $(document).ready(function () {
 			k = Math.floor((Math.floor(Math.random()*(m-min))+min)*.75);//k will be no more than 3/4 of m. Ensures that there won't be too few unaccented beats.
 		}
 
-		var beatArray = euclid(m, k);//Generate random rhythm using m and k
+		var beatArray = failedBeat || euclid(m, k);//Generate random rhythm using m and k or use beat from previously failed level
 		beatArray.forEach(function(el, i){//get random key values
 			if(el===0) beatArray[i] = keyCodes[Math.floor(Math.random()*keyCodes.length)];//Select random note to play
 		});
@@ -151,9 +152,11 @@ $(document).ready(function () {
 				isAccented();
 				if(score === numZeros){
 					$('.notes').html('Well Done').removeClass('faded');
+					failedBeat = false;
 					level++;
 				} else {
 					$('.notes').html('Try Again').removeClass('faded');
+					failedBeat = beatArray;
 				}
 				numZeros = 0;
 				score = 0;
@@ -177,19 +180,19 @@ $(document).ready(function () {
 					}
 				}, ms);
 			} else if(beatArray[i] === 1){
-				if(beatArray[i+1]!==1){
+				if(beatArray[i+1] !== 1 && beatArray[i+1] !== undefined)
 					$('.notes').html(String.fromCharCode(beatArray[i+1])).addClass('faded');
-				}
+				else
+					$('.notes').html('...');
 				setTimeout(function(){
 					isAccented();
 				}, ms);
-				if(beatArray[i+1] !== undefined){
-					setTimeout(function(){
+				setTimeout(function(){
+					if(beatArray[i+1] !== undefined)
 						playRhythm(beatArray, i+1);
-					}, ms*2);
-				} else {
-					endRound();
-				}
+					else
+						endRound();
+				}, ms*2);
 			} else if(beatArray[i] !== 1){
 				$('.notes').removeClass('faded');
 				numZeros++;
