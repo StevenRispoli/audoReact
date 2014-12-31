@@ -71,14 +71,33 @@ $(document).ready(function () {
 	var level = 1;
 	var score = 0;
 	var numZeros = 0;//Number of unaccented beats
+	var max = 0;//Max length of rhythm
 	var m = 0;//Total number of beats
 	var k = 0;//Number of accented beats
-	var min = 0;//Min length of rhythm
-	var max = 0;//Max length of rhythm
 	var ms = 0;//Time in ms that a sound plays. Will always be equal to half the length of a beat
 	var bpm = 60;
 	var failedBeat = false;//Beat from level the user failed
 
+	//max length of rhythm is equal to the next level that is a multiple of 4 but no longer than 32
+	var setMax = function(){
+		var calcMax = Math.ceil(level/4)*4;
+		if(calcMax<32)
+			max = calcMax;
+		else 
+			max = 32;
+	};
+	
+	var set_m_k = function(){
+		//random integer between min(2) and max, inclusively.
+		m = Math.floor(Math.random()*((max+1)-2))+2;
+		//k will be between 3/4m and 1/4m, inclusively
+		switch(m){
+			case 2: k = 1; break;
+			case 3: (Math.random()<.5) ? k=1 : k=2; break;
+			default: k = Math.floor(Math.random()*(((m*.75)+1)-(m*.25))+(m*.25));
+		};
+	};
+	
 	//Rhythm playback is 5 bpm faster every fourth level
 	var setBPM = function(){
 		if(!((level-1)%4) && level-1 > 0 && failedBeat === false){
@@ -88,24 +107,20 @@ $(document).ready(function () {
 
 	$('body').on('click', '#start', function(){
 		waveformColor = 'rgb(0,153,255)';
+		setBPM();
+		setMax();
+		set_m_k();
 		$('#score').html(score);
 		$('#level').html(level);
-		setBPM();
 		$('#bpm').html(bpm);
-		max = Math.ceil(level/4)*4;//max length of rhythm is equal to the next level that is a multiple of 4
-		min = max/2;
-		m = Math.floor(Math.random()*((max+1)-min))+min;//random integer between min and max, including min but excluding max
 		ms = (60000/bpm)/2;
-		if(Math.random()<.5){
-			k = Math.ceil((Math.floor(Math.random()*(m-min))+min)*.5);//k will be less than half of m
-		}else{
-			k = Math.floor((Math.floor(Math.random()*(m-min))+min)*.75);//k will be no more than 3/4 of m. Ensures that there won't be too few unaccented beats.
-		}
-
+		
 		var beatArray = failedBeat || euclid(m, k);//Generate random rhythm using m and k or use beat from previously failed level
+		
 		beatArray.forEach(function(el, i){//get random key values
 			if(el===0) beatArray[i] = keyCodes[Math.floor(Math.random()*keyCodes.length)];//Select random note to play
 		});
+		
 		var keydown = $.Event('keydown');//Keydown event for app to play sounds
 		keydown.which = 65;
 		var keyup = $.Event('keyup');//Keyup event for app to stop play sounds
