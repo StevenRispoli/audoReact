@@ -12,7 +12,7 @@ $(document).ready(function () {
 		var lastArrIndex = 0;
 
 		function genInitialArray(){
-			var a = m-k;
+			var a = m-k;//Number of 0's
 			if(m/k<2){//More 1's than 0's
 				for(var i = 0; i < a; i++){
 					beats.push([1,0]);
@@ -34,15 +34,12 @@ $(document).ready(function () {
 		genInitialArray();
 		
 		function mergeDiffArrays(){
+			var currIndex = 0;
 			for(var i = 0; i < beats.length; i++){
 				if(beats[i].length < beats[0].length && beats.length-1 > i){
 					lastArrIndex = i-1;
 					break;
 				}else if(i === beats.length-1){
-					/**	
-					 * Why would returning rhythm here and then calling mergeDiffArrays() in the return
-					 * statement for euclid() return a value of undefined?
-					 */
 					rhythm = beats.join().split(",");
 					rhythm.forEach(function(_, index){
 						rhythm[index] = parseInt(rhythm[index])
@@ -50,7 +47,6 @@ $(document).ready(function () {
 					return;
 				}
 			}
-			var currIndex = 0;
 			while(beats.length-1 > lastArrIndex && beats.length-1 > currIndex){
 				if(beats[beats.length-1].length < beats[lastArrIndex].length){
 					var lastIndex = beats.splice(beats.length-1,1);
@@ -105,7 +101,10 @@ $(document).ready(function () {
 		}
 	};
 
+
 	$('body').on('click', '#start', function(){
+		var startBtn = this;
+		$(startBtn).prop("disabled",true);//Prevents more than one rhythm playing when start button is pressed during playback
 		waveformColor = 'rgb(0,153,255)';
 		setBPM();
 		setMax();
@@ -114,11 +113,13 @@ $(document).ready(function () {
 		$('#level').html(level);
 		$('#bpm').html(bpm);
 		ms = (60000/bpm)/2;
+
+		//Generate random rhythm using m and k or use beat from previously failed level
+		var beatArray = failedBeat || euclid(m, k);
 		
-		var beatArray = failedBeat || euclid(m, k);//Generate random rhythm using m and k or use beat from previously failed level
-		
-		beatArray.forEach(function(el, i){//get random key values
-			if(el===0) beatArray[i] = keyCodes[Math.floor(Math.random()*keyCodes.length)];//Select random note to play
+		//Select random note to play for each unaccented beat
+		beatArray.forEach(function(el, i){
+			if(el===0) beatArray[i] = keyCodes[Math.floor(Math.random()*keyCodes.length)];
 		});
 		
 		var keydown = $.Event('keydown');//Keydown event for app to play sounds
@@ -169,6 +170,7 @@ $(document).ready(function () {
 				}
 				numZeros = 0;
 				score = 0;
+				$(startBtn).prop("disabled", false);
 			}
 
 			if(usersTurn > 0){
@@ -207,11 +209,12 @@ $(document).ready(function () {
 				numZeros++;
 				var foundKeys = [];
 				var hit = false;
+				//Determine what keys were pressed by the user
 				function listenForCorrectKey(){
 					for(key in depressedKeys){
 						if(depressedKeys[key] && foundKeys.indexOf(parseInt(key))<0){
 							foundKeys.push(parseInt(key));
-							if(parseInt(key)===beatArray[i] && hit===false){
+							if(parseInt(key)===beatArray[i] && hit===false){//Check if key pressed is the correct key
 								hit = true;
 							}
 						}
@@ -227,7 +230,7 @@ $(document).ready(function () {
 				setTimeout(function(){
 					noSound();
 					$('.notes').html(String.fromCharCode(beatArray[i+1])).addClass('faded');
-					if(foundKeys.length === 1 && hit === true){
+					if(foundKeys.length === 1 && hit === true){//Iterate score if the correct key is the only key that was pressed
 						score++;
 						$('#score').html(score);
 					}
@@ -271,7 +274,8 @@ $(document).ready(function () {
 			//put time data collected by the analyser into the dataArray
 			analyser.getByteTimeDomainData(dataArray);
 			
-			/*Reference: https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame
+			/**
+			 *Reference: https://developer.mozilla.org/en-US/docs/Web/API/window.requestAnimationFrame
 			 *tells the browser that you wish to perform an animation and 
 			 *requests that the browser call a specified function to update an animation before the next repaint.
 			 */ 
@@ -395,7 +399,7 @@ $(document).ready(function () {
 	     * Aeolian = 6
 	     * Locrian = 7
 	     */
-	     //generate scale based on which mode was chosen by the user
+	    //generate scale based on which mode was chosen by the user
 	   	switch (modeNum){
 	   		case 1: genScale(ionian); break;
 	   		case 2: genScale(dorian); break;

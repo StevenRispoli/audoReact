@@ -17,6 +17,10 @@ h3 {
 	background-color: #000;
 }
 
+select, #start {
+	height: 2em;
+}
+
 #level, #bpm, #score {
 	color: rgb(0,255,0);
 }
@@ -26,6 +30,23 @@ h3 {
 	margin: 0;
 	padding: 0;
 	color: rgba(0, 153, 255, 1);
+}
+
+canvas {
+	margin: 2% 0 2% 0;
+}
+
+#how-to-play {
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	color: #FF6600;
+}
+
+.instructions {
+	font-size: 1.25em;
+	text-align: center;
+	margin: 2% 20% 2% 20%;
 }
 
 .faded {
