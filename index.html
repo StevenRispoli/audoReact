@@ -5,7 +5,7 @@
 		<meta name="viewport" content="width=device-width, inital-scale = 1">
 		<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 		<link rel="stylesheet" type="text/css" href="css/styles.css">
-		<title>audiMate</title>
+		<title>audoReact</title>
 	</head>
 	<body>
 		<header class="navbar navbar-inverse navbar-static-top" role="navigation">
@@ -56,6 +56,10 @@
 		<h3>Score: <span id="score"></span></h3>
 		<h1 class="notes">Press start to begin</h1>
 		<canvas id="visualizer" height="300"></canvas>
+		<h1 id="how-to-play">How to play</h1>
+		<p class="instructions">audoReact is music-based game designed to improve your reaction speed, musical timing, and comfort with odd and compound time signatures.</p>
+		<p class="instructions">Start by choosing a musical scale and tonic(also known as a key) from the dropdown menus. The notes in the scale you chose will be immediately playable on the home row keys (asdf jkl;). When you press the start button, a rhythm will begin to play. Rhythms consist of accented and unaccented beats. Unaccented beats will be played in the tonic that you chose and accented beats will be played one octave higher.</p>
+		<p class="instructions">Listen to the rhythm as it plays three times. You'll notice a blue waveform. To let you know when the rhythm is nearly ended, it will turn green when there are four beats left and red when there are two beats left. On the fourth and final playthrough, a faded letter will appear on-screen before every unaccented beat. During the unaccented beat, the letter will unfade, signaling for you to press the key for that letter. Hit every letter on-time to progress to the next level. The rhythms will get longer and faster every 4 levels. There is no limit to the number of levels you can play.</p>
 		<script src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/bootstrap.min.js"></script>
 		<script src='js/main.js'></script>
