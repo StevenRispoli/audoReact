@@ -1,5 +1,49 @@
 $(document).ready(function () {
 
+	//-----------------------------------------------Local Storage------------------------------------------------
+
+	Storage.prototype.setObject = function(name, value) {
+	    this.setItem(name, JSON.stringify(value));
+	}
+
+	Storage.prototype.getObject = function(name) {
+	    return JSON.parse(this.getItem(name));
+	}
+
+	//Properties of a level
+	var gameProps = {
+		level: 		1,
+		score: 		0,
+		numZeros: 	0,//Number of unaccented beats
+		max: 		0,//Max length of rhythm
+		m: 			0,//Total number of beats
+		k: 			0,//Number of accented beats
+		ms: 		0,//Time in ms that a sound plays. Will always be equal to half the length of a beat
+		bpm: 		60,//Beats per minute
+		failedBeat: false//Rhythm from level the user failed
+	};
+
+	var getGameProps = function(){
+		if(!localStorage.getObject('gameProps')){ 
+			localStorage.setObject('gameProps', gameProps);
+		}
+		gameProps = localStorage.getObject('gameProps');
+	};
+	getGameProps();
+
+	var saveGameProps = function(level, score, numZeros, max, m, k, ms, bpm, failedBeat){
+		gameProps.level = level;
+		gameProps.score = score;
+		gameProps.numZeros = numZeros;
+		gameProps.max = max;
+		gameProps.m = m;
+		gameProps.k = k;
+		gameProps.ms = ms;
+		gameProps.bpm = bpm;
+		gameProps.failedBeat = failedBeat;
+		localStorage.setObject('gameProps', gameProps);
+	};
+
 	//---------------------------------------Random rhythm generation--------------------------------------------
 	
 	/**
@@ -40,7 +84,7 @@ $(document).ready(function () {
 					lastArrIndex = i-1;
 					break;
 				}else if(i === beats.length-1){
-					rhythm = beats.join().split(",");
+					rhythm = beats.join().split(',');
 					rhythm.forEach(function(_, index){
 						rhythm[index] = parseInt(rhythm[index])
 					});
@@ -63,20 +107,19 @@ $(document).ready(function () {
 
 	//-----------------------------------------------Game Logic--------------------------------------------------
 	
-	//Properties of a level
-	var level = 1;
-	var score = 0;
-	var numZeros = 0;//Number of unaccented beats
-	var max = 0;//Max length of rhythm
-	var m = 0;//Total number of beats
-	var k = 0;//Number of accented beats
-	var ms = 0;//Time in ms that a sound plays. Will always be equal to half the length of a beat
-	var bpm = 60;
-	var failedBeat = false;//Beat from level the user failed
+	var level = gameProps['level'];
+	var score = gameProps['score'];
+	var numZeros = gameProps['numZeros'];
+	var max = gameProps['max'];
+	var m = gameProps['m'];
+	var k = gameProps['k'];
+	var ms = gameProps['ms'];
+	var bpm = gameProps['bpm'];
+	var failedBeat = gameProps['failedBeat'];
 
-	//max length of rhythm is equal to the next level that is a multiple of 4 but no longer than 32
+	//max length of rhythm is equal to the next level that is a multiple of 8 but no longer than 32
 	var setMax = function(){
-		var calcMax = Math.ceil(level/4)*4;
+		var calcMax = Math.ceil(level/8)*8;
 		if(calcMax<32)
 			max = calcMax;
 		else 
@@ -94,17 +137,17 @@ $(document).ready(function () {
 		};
 	};
 	
-	//Rhythm playback is 5 bpm faster every fourth level
+	//Rhythm playback is 10 bpm faster every fourth level
 	var setBPM = function(){
 		if(!((level-1)%4) && level-1 > 0 && failedBeat === false){
-			bpm += 5;
+			bpm += 10;
 		}
 	};
 
 
 	$('body').on('click', '#start', function(){
 		var startBtn = this;
-		$(startBtn).prop("disabled",true);//Prevents more than one rhythm playing when start button is pressed during playback
+		$(startBtn).prop('disabled',true);//Prevents more than one rhythm playing when start button is pressed during playback
 		waveformColor = 'rgb(0,153,255)';
 		setBPM();
 		setMax();
@@ -170,7 +213,8 @@ $(document).ready(function () {
 				}
 				numZeros = 0;
 				score = 0;
-				$(startBtn).prop("disabled", false);
+				$(startBtn).prop('disabled', false);
+				saveGameProps(level, score, numZeros, max, m, k, ms, bpm, failedBeat);
 			}
 
 			if(usersTurn > 0){
