@@ -1,8 +1,20 @@
+html {
+	font-weight: 500 !important;
+}
+
 body {
 	margin: 0;
 	padding: 0;
 	background-color: #000;
 	color: rgb(0,153,255);
+	font-family: Monospace;
+}
+
+img {
+	width: 20%;
+	margin: 1% auto 0;
+	padding: 0;
+	display: block;
 }
 
 h3 {
@@ -17,8 +29,30 @@ h3 {
 	background-color: #000;
 }
 
-select, #start {
+select, #help, #start {
 	height: 2em;
+	background: #000;
+	border: 1px solid rgb(0,153,255);
+	border-radius: 5%;
+	margin: 0 3px 0 0;
+}
+
+#help {
+	border: 1px solid rgb(0,255,0);
+	color: rgb(0,255,0);
+}
+
+option {
+	height: 2em;
+	background: #000;
+}
+
+select:focus, option:focus, #start:focus {
+	box-shadow: 0 0 15px rgb(0,255,0);
+}
+
+#help:focus {
+	box-shadow: 0 0 15px rgb(0,153,255);	
 }
 
 #level, #bpm, #score {
@@ -38,15 +72,20 @@ canvas {
 
 #how-to-play {
 	text-align: center;
-	margin: 0;
+	margin: 3% 0 0 0;
 	padding: 0;
-	color: #FF6600;
+	color: rgb(0,153,255);
+	font-style: italic;
+}
+
+#help-text {
+	display: none;
 }
 
 .instructions {
 	font-size: 1.25em;
 	text-align: center;
-	margin: 2% 20% 2% 20%;
+	margin: 1% 20% 1% 20%;
 }
 
 .faded {

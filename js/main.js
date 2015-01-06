@@ -31,16 +31,7 @@ $(document).ready(function () {
 	};
 	getGameProps();
 
-	var saveGameProps = function(level, score, numZeros, max, m, k, ms, bpm, failedBeat){
-		gameProps.level = level;
-		gameProps.score = score;
-		gameProps.numZeros = numZeros;
-		gameProps.max = max;
-		gameProps.m = m;
-		gameProps.k = k;
-		gameProps.ms = ms;
-		gameProps.bpm = bpm;
-		gameProps.failedBeat = failedBeat;
+	var saveGameProps = function(){
 		localStorage.setObject('gameProps', gameProps);
 	};
 
@@ -107,15 +98,15 @@ $(document).ready(function () {
 
 	//-----------------------------------------------Game Logic--------------------------------------------------
 	
-	var level = gameProps['level'];
-	var score = gameProps['score'];
-	var numZeros = gameProps['numZeros'];
-	var max = gameProps['max'];
-	var m = gameProps['m'];
-	var k = gameProps['k'];
-	var ms = gameProps['ms'];
-	var bpm = gameProps['bpm'];
-	var failedBeat = gameProps['failedBeat'];
+	var level = gameProps.level;
+	var score = gameProps.score;
+	var numZeros = gameProps.numZeros;
+	var max = gameProps.max;
+	var m = gameProps.m;
+	var k = gameProps.k;
+	var ms = gameProps.ms;
+	var bpm = gameProps.bpm;
+	var failedBeat = gameProps.failedBeat;
 
 	//max length of rhythm is equal to the next level that is a multiple of 8 but no longer than 32
 	var setMax = function(){
@@ -214,7 +205,7 @@ $(document).ready(function () {
 				numZeros = 0;
 				score = 0;
 				$(startBtn).prop('disabled', false);
-				saveGameProps(level, score, numZeros, max, m, k, ms, bpm, failedBeat);
+				saveGameProps();
 			}
 
 			if(usersTurn > 0){
@@ -519,5 +510,9 @@ $(document).ready(function () {
   			oscillators[key].gain.gain.value=0;
   			depressedKeys[key] = false;
 		}
+  	});
+
+  	$('#help').on('click', function(){
+  		$('#help-text').slideToggle(400);
   	});
 });
