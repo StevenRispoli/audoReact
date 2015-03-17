@@ -71,6 +71,8 @@ $(document).ready(function () {
 		function mergeDiffArrays(){
 			var currIndex = 0;
 			for(var i = 0; i < beats.length; i++){
+				//lastArrIndex is the last array that is the same as the arrays before it
+				//must be 2 or more arrays after lastArrIndex
 				if(beats[i].length < beats[0].length && beats.length-1 > i){
 					lastArrIndex = i-1;
 					break;
@@ -82,6 +84,7 @@ $(document).ready(function () {
 					return;
 				}
 			}
+			//Loop ends when lastArrIndex is the last array or there are no more arrays left that can be merged
 			while(beats.length-1 > lastArrIndex && beats.length-1 > currIndex){
 				if(beats[beats.length-1].length < beats[lastArrIndex].length){
 					var lastIndex = beats.splice(beats.length-1,1);
